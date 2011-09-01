@@ -1,15 +1,8 @@
 <?php defined('SYSPATH') or die('No direct script access.');
 // -- Environment setup --------------------------------------------------------
 
-if(DEBUG_MODE){
-	ini_set("eaccelerator.enable","0");
-}
-
 // Load the core Kohana class
 require SYSPATH.'classes/kohana/core'.EXT;
-
-// Load the core JKit class
-require MODPATH.'jkit/classes/jkit'.EXT;
 
 if (is_file(APPPATH.'classes/kohana'.EXT))
 {
@@ -20,6 +13,15 @@ else
 {
 	// Load empty core extension
 	require SYSPATH.'classes/kohana'.EXT;
+}
+
+// Load the core JKit class
+require MODPATH.'jkit/classes/jkit'.EXT;
+
+if (is_file(APPPATH.'class/jkit'.EXT))
+{
+	// Application extends the core
+	require APPPATH.'classes/jkit'.EXT;	
 }
 
 /**
@@ -64,7 +66,7 @@ I18n::lang('zh-cn');
 /**
  * 设置cookie加密令牌
  */
-Cookie::$salt = 'jkit.akira-cn.me';
+Cookie::$salt = 'jkit';
 
 /**
  * Set Kohana::$environment if a 'KOHANA_ENV' environment variable has been supplied.
@@ -72,23 +74,26 @@ Cookie::$salt = 'jkit.akira-cn.me';
  * Note: If you supply an invalid environment name, a PHP warning will be thrown
  * saying "Couldn't find constant Kohana::<INVALID_ENV_NAME>"
  */
-/*if (isset($_SERVER['KOHANA_ENV']))
+if (isset($_SERVER['KOHANA_ENV']))
 {
-	Kohana::$environment = constant('Kohana::'.strtoupper($_SERVER['KOHANA_ENV']));
-}*/
+	JKit::$environment = constant('Kohana::'.strtoupper($_SERVER['KOHANA_ENV']));
+}
+else{
+	JKit::$environment = JKit::DEVELOPMENT;
+}
 
 //注册模块
 JKit::register_modules(array(
-	'jkit'	=>  MODPATH.'jkit',				 // the JKit framework
-	// 'auth'       => MODPATH.'auth',       // Basic authentication
-	// 'cache'      => MODPATH.'cache',      // Caching with multiple backends
-	// 'codebench'  => MODPATH.'codebench',  // Benchmarking tool
-	// 'database'   => MODPATH.'database',   // Database access
-	// 'image'      => MODPATH.'image',      // Image manipulation
-	// 'orm'        => MODPATH.'orm',        // Object Relationship Mapping
-	'unittest'   => MODPATH.'unittest',      // Unit testing
-	'sample'	=>	APPPATH.'sample',		 //default sample
-	'userguide'  => MODPATH.'userguide',     // User guide and API documentation
+	'jkit'		=>  MODPATH.'jkit',		 // the JKit framework
+	'tests'		=>	MODPATH.'jkit/tests',	 // the tests for JKit
+	// 'auth'       => MODPATH.'auth',		 // Basic authentication
+	// 'cache'      => MODPATH.'cache',		 // Caching with multiple backends
+	// 'codebench'  => MODPATH.'codebench',		 // Benchmarking tool
+	// 'database'   => MODPATH.'database',		 // Database access
+	// 'image'      => MODPATH.'image',		 // Image manipulation
+	// 'orm'        => MODPATH.'orm',		 // Object Relationship Mapping
+	// 'unittest'   => MODPATH.'unittest',		 // Unit testing
+	// 'userguide'  => MODPATH.'userguide',		 // User guide and API documentation
 ));
 
 /**

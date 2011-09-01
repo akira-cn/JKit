@@ -1,12 +1,9 @@
 <?php defined('SYSPATH') or die('No direct script access.');
-//开发环境配置
-JKit::$environment = JKit::DEVELOPMENT;
-
 /**
  * View/Layout 层模板相关的默认设置
  */
 JKit::$template_settings = array(
-	'enable_php'		=>  true,									//是否允许使用php，关闭以加快解析速度
+	'enable_php'		=>  true,	//是否允许使用php，关闭将只允许Smarty语法，加快解析速度
 	
 	'compile_dir'		=>	MODPATH.'jkit/views/.smarty/tpl_c/',
 	'config_dir'		=>	MODPATH.'jkit/views/.smarty/configs/',

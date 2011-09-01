@@ -1,11 +1,11 @@
 ## [JKit]()
 
-- 新手指南
+- 基础教程
    - [快速上手 (必读)](basic/quickstart)
    - [和前一版本的变化](basic/changes)
    - [安装和配置](basic/install)
-   - [基本规则与约定]
-   - [配置文件]
+   - [基本规则与约定](basic/rules)
+   - [读取配置](../kohana/config)
    - HTTP
       - [Request]
       - [Response]

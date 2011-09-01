@@ -9,7 +9,7 @@
  * @copyright  (c) 2011 WED Team
  * @license    http://kohanaframework.org/license
  */
-class JKit extends Kohana_Core{
+class JKit extends Kohana{
 	
 	/**
 	 * 默认的模板设置

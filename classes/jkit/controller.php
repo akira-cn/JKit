@@ -96,8 +96,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 */
 	public function & __get($key){
 		if($key == 'template'){
-			$this->create_template();
-			return $this->template;
+			return $this->create_template();
 		}
 	}
 	
@@ -107,14 +106,14 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * [!!] 当前 controller 为 sample_foo， action 为 bar，那么 $this->create_template() 默认模板路径为: views/sample/foo/bar.php
 	 * 
 	 * @param  string 模板文件名
-	 * @return Controller 当前 controller
+	 * @return mixed  当前模板
 	 */
 	protected function create_template($file=null){
 		$this->template = self::$_template;
 		if($file){
 			$this->template->set_filename($file);
 		}
-		return $this;
+		return $this->template;
 	}
 
    /**

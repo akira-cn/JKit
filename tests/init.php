@@ -1,0 +1,7 @@
+<?php defined('SYSPATH') or die('No direct script access.');
+
+Route::set('jkit_test', 'tests(/<action>(/<id>))')
+	->defaults(array(
+		'controller' => 'tests',
+		'action'     => 'index',
+	));
