@@ -67,7 +67,7 @@
 
 1. `Request::forward` 取代了 `Controller::forward`
 
- [!!] 二者的参数也有不同
+ [!!] 二者的参数也有不同。并且，由于新的forward支持了Route的判断，因此controller不再能够省略（否则系统无法判断是否要用route）
 
         $this->request->forward('foo/bar', array('foo' => 'bar'), 301); 
         //use 301 replace with 302 in this case

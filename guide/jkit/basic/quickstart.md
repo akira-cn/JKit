@@ -370,8 +370,7 @@ JKit 基于 [Kohana] 3.2，作为她的一个模块加载。 但因为JKit对Koh
 
                 public function action_index()
                 {
-                        //forward到welcome/sample，因为是当前controller，所以welcome被省略了
-                        $this->request->forward('sample');
+                        $this->request->forward('welcome/sample');
                 }
 
         [!!] 这样我们就能直接通过 http://my.site/myapp/ 访问刚才的action了

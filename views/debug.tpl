@@ -40,7 +40,7 @@ p {
 }
 
 #debug_console{
-    margin-bottom: 100px;
+    margin-bottom:10px;
 }
 
 #debug_console p, 
@@ -86,9 +86,11 @@ table.template_vars td {
     color: maroon;
 }
 
+#view_profiling,
 #view_profiling table{
     margin:0;
     padding:0;
+    width:100%;
 }
 {/literal}
 </style>
@@ -112,16 +114,32 @@ table.template_vars td {
 	</div>
 	{/if}
 
+	{if $_request_params}
+	<h2>request_params</h2>
+
+	<table class="template_vars" id="table_config_vars">
+	    {foreach $_request_params as $vars}
+	       <tr class="{if $vars@iteration % 2 eq 0}odd{else}even{/if}">   
+	       <th>{$vars@key|escape:'html'}</th>
+	       <td>{$vars|debug_print_var}</td></tr>
+	    {/foreach}
+	</table>
+	{/if}
+
 	<h2>assigned template variables</h2>
 
 	<table class="template_vars" id="table_assigned_vars">
 	    {foreach $assigned_vars as $vars}
+	      {if $vars@key != '_request_params'}
 	       <tr class="{if $vars@iteration % 2 eq 0}odd{else}even{/if}">   
 	       <th>${$vars@key|escape:'html'}</th>
 	       <td>{$vars|debug_print_var}</td></tr>
+	      {/if}
 	    {/foreach}
 	</table>
+	
 
+	{if $config_vars}
 	<h2>assigned config file variables (outer template scope)</h2>
 
 	<table class="template_vars" id="table_config_vars">
@@ -130,12 +148,24 @@ table.template_vars td {
 	       <th>{$vars@key|escape:'html'}</th>
 	       <td>{$vars|debug_print_var}</td></tr>
 	    {/foreach}
-
 	</table>
+	{/if}
+
+	{if $smarty.cookies}
+	<h2>cookies</h2>
+
+	<table class="template_vars" id="table_config_vars">
+	    {foreach $smarty.cookies as $vars}
+	       <tr class="{if $vars@iteration % 2 eq 0}odd{else}even{/if}">   
+	       <th>{$vars@key|escape:'html'}</th>
+	       <td>{$vars|debug_print_var}</td></tr>
+	    {/foreach}
+	</table>
+	{/if}
 </div>
 
 <div id="view_profiling">
-	{Kohana_View::factory('profiler/stats')}
+	{View::factory('profiler/stats')}
 </div>
 
 </body>

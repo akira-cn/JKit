@@ -115,7 +115,7 @@ JKit::init(array(
 	'index_file' => false,
 	'charset' => 'utf-8',
 	'caching' => DEBUG_MODE ? false : true,
-	'errors' => DEBUG_MODE ? true : false,
+	'errors' => false,
 	'profile' => DEBUG_MODE ? true : false,
 ));
 

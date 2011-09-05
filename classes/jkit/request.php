@@ -64,23 +64,22 @@ class JKit_Request extends Kohana_Request{
 	 * [!!] 跳转会设置 HTTP 状态码为 301 或 302  
 	 * 如果当前action始终跳转到一个地址，应当用 301，否则应当用 302
 	 *
-	 * @param string 要跳转到的controller_action，中间用"/"分隔，controller可缺省，默认为当前controller
+	 * @param string 要跳转到的uri
 	 * @param string 新增query参数，原有参数会保留
 	 * @param int    跳转状态码 301 或 302
 	 * @uses  Profiler::stop_all
 	 */
-	public function forward($controller_action, $params = array(), $code = 302){
+	public function forward($uri, $params = array(), $code = 302){
 		
-		list($action, $controller) = array_reverse(explode('/', $controller_action));
+		$forward = Request::process_uri($uri);
+	
+		$this->route($forward['route']);
+		$this->action($forward['params']['action']);
+		$this->controller($forward['params']['controller']);
 
-		$this->action($action);
-		if (!is_null($controller)) {
-			$this->controller($controller);
-		}
+		unset($forward['params']['controller'], $forward['params']['action'], $forward['params']['directory']);
 
-		foreach ($params as $key => $value) {
-			$this->query($key, $value);
-		}
+		$this->_params = $forward['params'] + $params;
 
 		Profiler::stop_all(); //结束所有的Profiler
 

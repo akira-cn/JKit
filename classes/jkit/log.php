@@ -201,7 +201,7 @@ class JKit_Log extends Kohana_Log {
 		//这里不用 Date::formatted_time 是因为Log会在很多类加载之前调用，而且Kohana::log_file中也可能hook到Data（通过Profiler)
 		//如果依赖 Date，那么在 Kohana::find_file -> Kohana::auto_load -> Kohana::find_file 会出现循环，结果导致Date类不能被加载
 		$time = new DateTime('now', new DateTimeZone(
-			$timezone ? Log::$timezone : date_default_timezone_get()
+			Log::$timezone ? Log::$timezone : date_default_timezone_get()
 		));
 
 		// Create a new message and timestamp it

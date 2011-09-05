@@ -101,7 +101,10 @@ class JKit_Response extends Kohana_Response{
 		
 		//如果有_request将_request的param()传进去
 		if($this->_request && $this->_request->param()){
-			$this->_body->set('request_params', $this->_request->param());
+			$this->_body->set_global('_request_params', $this->_request->param());
+		}
+		else{
+			$this->_body->set_global('_request_params', $_POST + $_GET);
 		}
 
 		return $this;
