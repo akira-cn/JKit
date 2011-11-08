@@ -148,12 +148,12 @@ class JKit_VCode{
 		return $response;
 	}
 
-	/*
+	/**
 	 * 提交验证码到服务器
 	 *
 	 *     <input type="text" name="vcode"/>
-	 *	   <!-- 自动验证
-	 *     <input type="hidden" name="vcode" value="VCode::code()"/>
+	 *     <!-- 自动验证
+	 *        <input type="hidden" name="vcode" value="VCode::code()"/>
 	 *     -->
 	 *
 	 * 使用[Validation]组件检查验证码

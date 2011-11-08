@@ -155,6 +155,15 @@ class Controller_Tests extends Controller {
 		$this->response->body(__Template__);
 		//echo $this->template->render();
 	}
+	
+	public function action_vcode(){
+		//echo VCode::code(true);
+		//echo 'done';
+		//$response = VCode::response();
+		//$response->send();
+		//$this->request->send_response($response);
+		VCode::response($this->response);
+	}
 
 	public function action_profiling(){
 		
