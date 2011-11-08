@@ -35,12 +35,13 @@ class JKit_Response extends Kohana_Response{
 	 * @return Response 
 	 */
 	public function json($data, $callback=null){
-		$this->headers(array('Content-type'=>'application/x-javascript', 'charset'=>'UTF-8'));
 		$json = json_encode($data);		
 
 		if($callback){
+			$this->headers(array('Content-type'=>'application/x-javascript', 'charset'=>'UTF-8'));
 			return $this->body("{$callback}({$json});"); 
 		}else{
+			$this->headers(array('Content-type'=>'application/json', 'charset'=>'UTF-8'));
 			return $this->body($json);
 		}
 	}

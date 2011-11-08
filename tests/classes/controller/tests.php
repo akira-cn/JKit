@@ -4,7 +4,7 @@ class Controller_Tests extends Controller {
 	
 	public function action_index()
 	{
-		$this->request->forward('welcome');
+		$this->request->forward('tests/welcome');
 	}
 
 	public function action_welcome(){
@@ -67,10 +67,11 @@ class Controller_Tests extends Controller {
 			'username'=>'1111.1',
 			'password'=>'121',
 			'confirm'=>'121',
-			'testrd' => '1',
+			'testrd' => '1d',
 			'testrd2' => '350103198112294930',
 			'testrd3' => '1981',
 			'testrd4' => 'akira.cn@gmail.com',
+			'vcode'   => 'om33',
 		);
 		
 		$rules = array(				
@@ -101,13 +102,16 @@ class Controller_Tests extends Controller {
 						'magic-pattern' => 'idnumber||email',
 					),
 				);
-		$validation = new Validation($this->param(), $rules);
+		$validation = new Validation($fields, $rules);
 
 		//自定义复杂规则
 		function complex($str){
 			return Valid::idnumber($str) || Valid::email($str);
 		}
 		$validation->rule('testrd4','complex');
+
+		$validation->rule('vcode','not_empty');
+		$validation->rule('vcode','VCode::check');
 
 		$this->valid($validation) and
 			$this->ok();

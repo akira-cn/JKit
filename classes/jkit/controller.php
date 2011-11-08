@@ -135,7 +135,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 	* @return Response|boolean  如果 {'err' : 'ok'} 返回 false，否则根据情况返回 Response 或 处理错误
 	*/
 	protected function err($data=null, $msg = null, $default_err='sys.default', $forward=null){
-		$result = Logic::parseResult($data, $msg, $forward, 'sys.default');
+		$result = Logic::parseResult($data, $msg, $forward, $default_err);
 
 		//产生错误，处理错误逻辑
 		if($result['err'] != 'ok'){

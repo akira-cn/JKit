@@ -37,9 +37,6 @@ if(JKit::$environment == JKit::DEVELOPMENT){
 	JKit::$config->attach(new Config_File('config/dev'));
 }
 
-//日志
-JKit::$log = Log::instance();
-
 //Attach the file write to logging. Multiple writers are supported.
 JKit::$log->attach(new Log_File(DOCROOT.'logs', 'JKit_Log',
 		JKit::$environment == JKit::DEVELOPMENT ? Log_File::SPLIT_DAY : Log_File::SPLIT_HOUR
