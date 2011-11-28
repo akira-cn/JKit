@@ -16,26 +16,6 @@
  */
 class JKit_Request extends Kohana_Request{
 	/**
-     *  当前的kohana版本中这个函数有个bug  
-	 *	传Array进去的时候忘记return $this  
-	 *
-	 * [!!] 修复bug
-	 *
-	 * @param  string key
-	 * @param  string value
-	 * @return mixed  设置或读取cookie
-	 */
-	public function cookie($key = NULL, $value = NULL){
-		if (is_array($key))
-		{
-			// Act as a setter, replace all cookies
-			$this->_cookies = $key;
-			return $this;
-		}
-		return parent::cookie($key, $value);
-	}
-
-	/**
 	 * 覆盖了 [Kohana_Request::param]，改变了它的功能  
 	 * 让param返回所有的参数，不论是route还是get还是post
 	 *
@@ -110,33 +90,6 @@ class JKit_Request extends Kohana_Request{
 
 		parent::redirect($url, $code);
 	}
-
-	/**
-	 * Creates a response based on the type of request, i.e. an
-	 * Request_HTTP will produce a Response_HTTP, and the same applies
-	 * to CLI.
-	 *
-	 * [!!] 重载 [Kohana_Response] ，自动将 `$this` 赋给创建的 [Response] 对象的 `_request` 属性
-	 *
-	 *      // Create a response to the request
-	 *      $response = $request->create_response();
-	 *
-	 * @param   boolean  $bind  Bind to this request
-	 * @return  Response
-	 * @since   3.1.0
-	 */
-	public function create_response($bind = TRUE)
-	{
-		$response = new Response(array('_protocol' => $this->protocol(), '_request' => $this));
-
-		if ($bind)
-		{
-			// Bind a new response to the request
-			$this->_response = $response;
-		}
-
-		return $response;
-	}	
 
 	/**
 	 * 将请求中可能出现跨站攻击的内容过滤

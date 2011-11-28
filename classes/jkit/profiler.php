@@ -38,10 +38,12 @@ class JKit_Profiler extends Kohana_Profiler{
 	 */
 	public static function stop_by_group($group){
 		$groups = Profiler::groups(false);
-
-		foreach($groups[strtolower($group)] as $name=>$tokens){
-			foreach($tokens as $token){
-				Profiler::stop($token);
+		
+		if($groups[strtolower($group)]){
+			foreach($groups[strtolower($group)] as $name=>$tokens){
+				foreach($tokens as $token){
+					Profiler::stop($token);
+				}
 			}
 		}
 	}

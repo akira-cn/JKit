@@ -38,10 +38,10 @@ class JKit_Response extends Kohana_Response{
 		$json = json_encode($data);		
 
 		if($callback){
-			$this->headers(array('Content-type'=>'application/x-javascript', 'charset'=>'UTF-8'));
+			$this->headers(array('content-type'=>'application/x-javascript', 'charset'=>'UTF-8'));
 			return $this->body("{$callback}({$json});"); 
 		}else{
-			$this->headers(array('Content-type'=>'application/json', 'charset'=>'UTF-8'));
+			$this->headers(array('content-type'=>'application/json', 'charset'=>'UTF-8'));
 			return $this->body($json);
 		}
 	}
@@ -71,41 +71,26 @@ class JKit_Response extends Kohana_Response{
 	/**
 	 * 让 Response 输出debug信息
 	 *
-	 *     $this->response->debug('debug content', array('foo' => 'bar'), array('another' => 'value') ...);
+	 *     $this->response->debug(array('foo' => 'bar'), array('another' => 'value') ...);
 	 *
-	 * [!!]	从第二个参数开始可以传入任意多个对象，将依次传入这些对象的信息
+	 * [!!]	可以传入任意多个对象，将依次传入这些对象的信息
 	 *
 	 * @return Response
 	 */
-	public function debug($template = null){
-		if(isset($template)){
-			$this->_body = $template;
-		}
-		if($this->_body instanceof JKit_View){ //view
-			$this->_body->debugging = true;
-		}
-		else{ //string.. ect..
+	public function debug(){
+		$this->headers(array('content-type'=>'text/html', 'charset'=>'UTF-8', 'jkit-debugger'=>'1.0'));
+
+		if(!($this->_body instanceof JKit_View)){ //view
 			$content = (string)$this->_body;
 			$this->_body = View::factory("string:{$content}");
-
-			$this->_body->debugging = true;
 		}
-		
+		$this->_body->debugging = true;
+
 		$args = func_get_args();
 		
 		//可以传额外参数进去
-		foreach($args as $key => $arg){
-			if($key){
-				$this->_body->set($arg);
-			}
-		}
-		
-		//如果有_request将_request的param()传进去
-		if($this->_request && $this->_request->param()){
-			$this->_body->set_global('_request_params', $this->_request->param());
-		}
-		else{
-			$this->_body->set_global('_request_params', $_POST + $_GET);
+		foreach($args as $arg){
+			$this->_body->set($arg);
 		}
 
 		return $this;

@@ -50,6 +50,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 		if (JKit::$security['csrf'] && count($this->request->post()))
 		{ //防止跨站请求伪造
 			if(!Security::check($this->request->post('csrf_token'))){
+				//in form: <input type="hidden" value="php Security::token();">
 				$this->handle_err(array('err'=>'sys.security.csrf'),'csrf detected');
 			}
 		}
@@ -77,7 +78,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 
 		//追加调试信息
 		if(JKit::$environment == JKit::DEVELOPMENT && $this->request->param('rdtest')){
-			$this->response->debug();
+			$this->response->debug(array('_requested_params' => $this->request->param()));
 		}
 		
 		parent::after();		
@@ -98,6 +99,16 @@ abstract class JKit_Controller extends Kohana_Controller{
 		if($key == 'template'){
 			return $this->create_template();
 		}
+	}
+	
+	/**
+	 * 重载魔术方法 __call
+	 * 支持加载一个不存在于action controller的默认路径模板
+	 * 缺省动作是将 request参数传入模板中
+	 * 这样就可以不写action只写模板
+	 */
+	public function __call($name, $args) {
+		$this->template->set_global($this->request->param());
 	}
 	
 	/**
@@ -130,11 +141,12 @@ abstract class JKit_Controller extends Kohana_Controller{
 	*
 	* @param  mixed				任意数据
 	* @param  string			错误信息
-	* @param  string			默认错误状态码
+	* @param  string			回调函数
 	* @param  string			跳转 url
+	* @param  string			默认错误状态码
 	* @return Response|boolean  如果 {'err' : 'ok'} 返回 false，否则根据情况返回 Response 或 处理错误
 	*/
-	protected function err($data=null, $msg = null, $default_err='sys.default', $forward=null){
+	protected function err($data=null, $msg = null, $callback=null, $forward=null, $default_err='sys.default'){
 		$result = Logic::parseResult($data, $msg, $forward, $default_err);
 
 		//产生错误，处理错误逻辑
@@ -235,9 +247,11 @@ abstract class JKit_Controller extends Kohana_Controller{
 	protected function handle_err($err_result, $reason='some reason', $status=403){
 		if(JKit::$environment == JKit::DEVELOPMENT){
 			if($this->request->param('rdtest')){
-				$this->response->debug(is_string($err_result) ? $err_result : json_encode($err_result));
+				$this->response->body($reason);
+				$this->response->debug(array('_requested_params' => $this->request->param()), 
+					is_string($err_result) ? array('data' => $err_result) : $err_result);
 			}
-			$this->request->send_response();
+			$this->response->send();
 		}else{
 			$class = "HTTP_Exception_{$status}";
 			throw new $class('Request to ":controller/:action" cause error for :reason.', array(
