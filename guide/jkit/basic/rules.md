@@ -60,6 +60,20 @@
         $this->template->set('foo', 'bar');
         //$this->response->body($this->template); //这句可以省略，让系统自动帮你做
 
+ 1. 魔术 action
+	
+[!!] 如果你在 Action 里面没有对模板做什么特别的，并且模板在默认路径下，你可以省略这个 Action，直接写模板，并且 request->param() 会自动传入成为模板变量
+	
+        /**
+         * 重载魔术方法 __call
+         * 支持加载一个不存在于action controller的默认路径模板
+         * 缺省动作是将 request参数传入模板中
+         * 这样就可以不写action只写模板
+         */	
+        public function __call($name, $args) {
+                $this->template->set_global($this->request->param());
+        }
+
  [!!] 有几种情况不会自动渲染
 
       a. 如果一个 Action 中根本没使用过 $this->template，这时需要自己调用，不然系统不能判断你是否需要使用模板
@@ -92,6 +106,7 @@
  1. 是否觉得 $this->response->body($this->template) 太难看？ 试试下面的写法：
 
         $this->response->body(__Template__);
+
 
 ## 有用的约定 {#useful-rules}
 
