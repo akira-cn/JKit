@@ -152,7 +152,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 		//产生错误，处理错误逻辑
 		if($result['err'] != 'ok'){
 			//如果是ajax请求
-			if($this->request->is_ajax()){ 
+			if($callback || $this->request->is_ajax()){	//如果有callback说明是jsonp，那么不一定用ajax
 				//直接返回json结果
 				$this->response->json($result, $callback)->send();
 			}
@@ -184,7 +184,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 
 		if(!$this->err($result)){
 			//如果是ajax请求
-			if($this->request->is_ajax()){ 
+			if($callback || $this->request->is_ajax()){  //如果有callback说明是jsonp，那么不一定用ajax
 				//直接返回json结果
 				$this->response->json($result, $callback)->send();
 			}else{
@@ -201,7 +201,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @uses Response::json
 	 */
 	protected function json($data, $callback=null){
-		$this->response->json($result, $callback)->send();
+		$this->response->json($data, $callback)->send();
 	}
 
 	/**
@@ -210,7 +210,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @uses Response::jsonp
 	 */
 	protected function jsonp($data, $callback=null){
-		$this->response->jsonp($result, $callback)->send();
+		$this->response->jsonp($data, $callback)->send();
 	}
 
 
@@ -228,7 +228,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @return Response|boolean 返回 Response 或者校验结果
 	 */
 	protected function valid($validation, $forward=NULL){
-		return !$this->err($validation->check(), $validation->errors(),"usr.submit.valid",$forward);
+		return !$this->err($validation->check(), $validation->errors(), null, $forward, "usr.submit.valid");
 	}
 
 	/**

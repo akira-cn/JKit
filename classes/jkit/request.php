@@ -41,15 +41,12 @@ class JKit_Request extends Kohana_Request{
 	/**
 	 * 让流程跳转到指定action
 	 *
-	 * [!!] 跳转会设置 HTTP 状态码为 301 或 302  
-	 * 如果当前action始终跳转到一个地址，应当用 301，否则应当用 302
-	 *
 	 * @param string 要跳转到的uri
 	 * @param string 新增query参数，原有参数会保留
-	 * @param int    跳转状态码 301 或 302
+	 * @param int    跳转状态码 20x
 	 * @uses  Profiler::stop_all
 	 */
-	public function forward($uri, $params = array(), $code = 302){
+	public function forward($uri, $params = array(), $code = 200){
 		
 		$forward = Request::process_uri($uri);
 	

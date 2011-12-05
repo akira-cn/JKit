@@ -164,9 +164,11 @@ table.template_vars td {
 	{/if}
 </div>
 
+{if JKit::$profiling}
 <div id="view_profiling">
 	{View::factory('profiler/stats')}
 </div>
+{/if}
 
 </body>
 </html>

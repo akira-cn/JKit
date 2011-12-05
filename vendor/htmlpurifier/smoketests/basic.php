@@ -15,16 +15,16 @@ if (!isset($allowed[$page])) $page = false;
 $strict = isset($_GET['d']) ? (bool) $_GET['d'] : false;
 
 echo '<?xml version="1.0" encoding="UTF-8" ?>';
-?>
-<?php if ($strict) { ?>
-<!DOCTYPE html
+if ($strict) {
+echo '<!DOCTYPE html
      PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-     "http://www.w3.org/TR/xhtml1/DTD/xhtml1- Strict.dtd">
-<?php } else { ?>
-<!DOCTYPE html
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1- Strict.dtd">';
+} else {
+echo '<!DOCTYPE html
      PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-loose.dtd">
-<?php } ?>
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-loose.dtd">';
+}
+?>
 <html>
 <head>
     <title>HTML Purifier Basic Smoketest</title>

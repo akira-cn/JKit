@@ -98,7 +98,7 @@ class JKit_VCode{
 
 		ImageFill($img, 0, 0, $bgcolor);
 
-		$response->headers(array('content-type' => 'image/PNG'));
+		$response->headers(array('content-type' => 'image/GIF'));
 		
 		$len = VCode::$code_length;
 		
@@ -130,7 +130,7 @@ class JKit_VCode{
 
 		try
 		{
-			ImagePNG($img);
+			imagegif($img);
 			ImageDestroy($img);
 		}
 		catch (Exception $e)
