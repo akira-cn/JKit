@@ -25,6 +25,8 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 */
 	protected static $_template;
 
+	protected $jsonp = false;
+
 	/**
 	 * 获得当前框架的默认模板
 	 *
@@ -50,6 +52,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 		if (JKit::$security['csrf'] && count($this->request->post()))
 		{ //防止跨站请求伪造
 			if(!Security::check($this->request->post('csrf_token'))){
+				//in form: <input type="hidden" value="php Security::token();">
 				$this->handle_err(array('err'=>'sys.security.csrf'),'csrf detected');
 			}
 		}
@@ -67,17 +70,21 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @return  void
 	 */
 	function after(){
-		//如果模板存在并且还没渲染过，那么自动渲染一下
+		//如果模板存在并且还没输出过，那么自动输出一下
 		//这个设计节省了一个 auto_render 参数，并且逻辑简单了
 		//这里用 property_exists 避免了在这里触发 __get
-		//判断一下 instanceof JKit_View 是避免别人继承其他 View 也来用这个变量导致误调用 $this->template->rendered
-		if(property_exists($this, 'template') && $this->template instanceof JKit_View && !$this->template->rendered()){
+		//判断一下 instanceof JKit_View 是避免别人继承其他 View 也来用这个变量名导致误输出
+		if(!$this->response->body()	//如果Response::body还没有打算输出任何信息 
+			&& property_exists($this, 'template') //如果$this->template存在
+			&& $this->template instanceof JKit_View)  //并且是JKit_View
+		{
+
 			$this->response->body($this->template);
 		}
 
 		//追加调试信息
 		if(JKit::$environment == JKit::DEVELOPMENT && $this->request->param('rdtest')){
-			$this->response->debug();
+			$this->response->debug(array('_requested_params' => $this->request->param()));
 		}
 		
 		parent::after();		
@@ -94,10 +101,20 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @param string 要获得的属性 key
 	 * @return View  默认的模板，路径默认为 <controller:路径>/<action>.php
 	 */
-	public function & __get($key){
+	public function __get($key){
 		if($key == 'template'){
 			return $this->create_template();
 		}
+	}
+	
+	/**
+	 * 重载魔术方法 __call
+	 * 支持加载一个不存在于action controller的默认路径模板
+	 * 缺省动作是将 request参数传入模板中
+	 * 这样就可以不写action只写模板
+	 */
+	public function __call($name, $args) {
+		$this->template->set_global($this->request->param());
 	}
 	
 	/**
@@ -130,28 +147,38 @@ abstract class JKit_Controller extends Kohana_Controller{
 	*
 	* @param  mixed				任意数据
 	* @param  string			错误信息
-	* @param  string			默认错误状态码
 	* @param  string			跳转 url
-	* @return Response|boolean  如果 {'err' : 'ok'} 返回 false，否则根据情况返回 Response 或 处理错误
+	* @param  string			回调函数
+	* @param  string			捕获的状态码匹配（可以用逗号分割多个，这个参数可以捕获特定类型的状态）
+	* @return miexed  			Response或Logic::parseResult的结果
 	*/
-	protected function err($data=null, $msg = null, $default_err='sys.default', $forward=null){
-		$result = Logic::parseResult($data, $msg, $forward, $default_err);
+	protected function err($data=null, $msg=null, $forward=null, $callback=null, $catch_errs=''){
+		$catch_errs = explode(',', $catch_errs);
+		
+		//第一个可接受的状态为parseResult默认状态，这样如果不返回默认状态码时，err总能被接住
+		$result = Logic::parseResult($data, $msg, $forward, $catch_errs[0]); 
 
-		//产生错误，处理错误逻辑
-		if($result['err'] != 'ok'){
+		//如果配置为默认支持jsonp
+		if(!$callback && $this->jsonp){
+			$callback = $this->request->param('cb'); //这个支持Route的callback
+		}
+
+		//如果捕获到的异常类型和$catch_err匹配
+		if( !$catch_errs[0] && $result['err'] != 'ok'  //如果不捕获特定状态，那么捕获除了ok之外的所有状态
+			|| in_array($result['err'], $catch_errs)){ 
 			//如果是ajax请求
-			if($this->request->is_ajax()){ 
+			if($callback || $this->request->is_ajax()){	//如果有callback说明是jsonp，那么不一定用ajax
 				//直接返回json结果
 				$this->response->json($result, $callback)->send();
 			}
 			else{
 				//不允许非ajax返回
 				$this->handle_err((string)$this->response->json($result, $callback), 'non-ajax access deny');
-				return true;
 			}
 		}
 
-		return false;
+		//否则返回result，期待下一个匹配
+		return $result;
 	}
 	
 	/**
@@ -167,20 +194,8 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @param  string			回调函数
 	 * @return Response|boolean 返回 Response 或者处理错误
 	 */
-	protected function ok($data=NULL, $forward=NULL, $callback=NULL){
-		$result = Logic::parseResult($data, NULL, $forward, 'ok');
-
-		if(!$this->err($result)){
-			//如果是ajax请求
-			if($this->request->is_ajax()){ 
-				//直接返回json结果
-				$this->response->json($result, $callback)->send();
-			}else{
-				//不允许非ajax返回
-				$this->handle_err((string)$this->response->json($result, $callback), 'non-ajax access deny');
-				return true;		
-			}
-		}
+	protected function ok($data=null, $forward=null, $callback=null){
+		return $this->err($data, null, $forward, $callback, 'ok');
 	}
 	
 	/**
@@ -189,7 +204,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @uses Response::json
 	 */
 	protected function json($data, $callback=null){
-		$this->response->json($result, $callback)->send();
+		$this->response->json($data, $callback)->send();
 	}
 
 	/**
@@ -198,14 +213,14 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * @uses Response::jsonp
 	 */
 	protected function jsonp($data, $callback=null){
-		$this->response->jsonp($result, $callback)->send();
+		$this->response->jsonp($data, $callback)->send();
 	}
 
 
 	/**
 	 * 表单校验函数，对表单进行校验
 	 * 
-	 *     if($this->valid($this->param(), $rules)){
+	 *     if($this->valid($this->request->param(), $rules)){
 	 *         $this->ok(); //提交成功
 	 *     }
 	 *
@@ -213,10 +228,11 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 * 
 	 * @param  Validation		要校验的对象
 	 * @param  string			跳转 url
+	 * @param  string			回调函数 (for js)
 	 * @return Response|boolean 返回 Response 或者校验结果
 	 */
-	protected function valid($validation, $forward=NULL){
-		return !$this->err($validation->check(), $validation->errors(),"usr.submit.valid",$forward);
+	protected function valid($validation, $forward=null, $callback=null){
+		return $this->err($validation->check(), $validation->errors(), $forward, $callback, "usr.submit.valid");
 	}
 
 	/**
@@ -235,9 +251,11 @@ abstract class JKit_Controller extends Kohana_Controller{
 	protected function handle_err($err_result, $reason='some reason', $status=403){
 		if(JKit::$environment == JKit::DEVELOPMENT){
 			if($this->request->param('rdtest')){
-				$this->response->debug(is_string($err_result) ? $err_result : json_encode($err_result));
+				$this->response->body($reason);
+				$this->response->debug(array('_requested_params' => $this->request->param()), 
+					is_string($err_result) ? array('data' => $err_result) : $err_result);
 			}
-			$this->request->send_response();
+			$this->response->send();
 		}else{
 			$class = "HTTP_Exception_{$status}";
 			throw new $class('Request to ":controller/:action" cause error for :reason.', array(

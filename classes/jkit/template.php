@@ -22,6 +22,7 @@ require_once Kohana::find_file('vendor', 'smarty3/Smarty.class');
 class JKit_Template extends Smarty{
 
 	public $resource_uri;
+	public $error_reporting;
 	
 	/**
 	 * 模板构造函数，根据 `CONFIG_PATH/smarty.settings` 中的配置和传入的配置数组初始化 Smarty 设置
@@ -33,9 +34,9 @@ class JKit_Template extends Smarty{
 	function __construct($opts=array())
 	{
 		$config = array_merge(JKit::$template_settings, $opts);
-		
-		parent::__construct();
+		$this->error_reporting = error_reporting() & ~E_NOTICE;
 
+		parent::__construct();
 		Arr::mix($this, $config, true);
 	}
 
@@ -72,7 +73,13 @@ class JKit_Template extends Smarty{
 
 		try
 		{
+			if (isset($template->error_reporting)) {
+				$_smarty_old_error_level = error_reporting($template->error_reporting);
+			}
 			Smarty_Internal_Debug::display_debug($template);
+			if (isset($template->error_reporting)) {
+				error_reporting($_smarty_old_error_level);
+			} 
 		}
 		catch (Exception $e)
 		{

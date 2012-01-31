@@ -54,18 +54,6 @@ class JKit_Valid extends Kohana_Valid{
 	
 	public static function min_length($value, $length, $type='text'){
 		if($type == 'bytetext'){
-			return strlen($value) <= $length;
-		}
-		else if($type == 'text'){
-			return UTF8::strlen($value) <= $length;
-		}
-		else if($type == 'richtext'){
-			return HTML::strlen($value) <= $length;
-		}
-	}
-
-	public static function max_length($value, $length, $type='text'){
-		if($type == 'bytetext'){
 			return strlen($value) >= $length;
 		}
 		else if($type == 'text'){
@@ -73,6 +61,18 @@ class JKit_Valid extends Kohana_Valid{
 		}
 		else if($type == 'richtext'){
 			return HTML::strlen($value) >= $length;
+		}
+	}
+
+	public static function max_length($value, $length, $type='text'){
+		if($type == 'bytetext'){
+			return strlen($value) <= $length;
+		}
+		else if($type == 'text'){
+			return UTF8::strlen($value) <= $length;
+		}
+		else if($type == 'richtext'){
+			return HTML::strlen($value) <= $length;
 		}
 	}
 

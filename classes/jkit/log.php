@@ -147,7 +147,12 @@ class JKit_Log extends Kohana_Log {
 			if (defined('SSI_REQUEST_ID')) {
 				$this->_intLogId = SSI_REQUEST_ID;
 			} else {
-				$this->_intLogId = intval(gettimeofday(true) * 100000) & 0x7FFFFFFF;
+				if (isset($_SERVER['SERVER_ADDR'])) {
+					$intTmp = ip2long($_SERVER['SERVER_ADDR']) << 31;
+				} else {
+					$intTmp = 0;
+				}			
+				$this->_intLogId = $intTmp + (intval(gettimeofday(true) * 100000) & 0x7FFFFFFF);
 			}
 		}
 		
@@ -210,7 +215,7 @@ class JKit_Log extends Kohana_Log {
 			'logid' => $this->_intLogId !== 0 ? $this->_intLogId : $this->getLogId(),
 			'level' => $intLevel,
 			'pos' => "{$strFile}:{$intLine}",
-			'body'  => $strLog,
+			'body'  => str_replace(array("\r\n", "\n", "\r"), '<br>', $strLog),
 			'param' => $arrParam,
 		);
 

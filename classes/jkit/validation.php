@@ -300,10 +300,10 @@ class ValidAdaptor{
 										$max = $rule['maxlength'];
 
 										if(isset($min)){
-											array_push($ret, array('min_length',array(':value',$datatype))); //文本(用来验证文本的长度)
+											array_push($ret, array('min_length',array(':value',$min))); //文本(用来验证文本的长度)
 										}
 										if(isset($max)){
-											array_push($ret, array('max_length',array(':value',$datatype)));
+											array_push($ret, array('max_length',array(':value',$max)));
 										}
 										unset($rule['minvalue']);
 										unset($rule['maxvalue']);

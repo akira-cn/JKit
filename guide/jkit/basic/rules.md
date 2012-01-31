@@ -89,6 +89,21 @@
               $this->template.'haha'; 
               //这个估计匪夷所思一点，因为触发了 View::__toString 导致了渲染
 
+
+ 1. 魔术 action
+	
+ [!!] 如果你在 Action 里面没有对模板做什么特别的，并且模板在默认路径下，你可以省略这个 Action，直接写模板，并且 request->param() 会自动传入成为模板变量
+	
+        /**
+         * 重载魔术方法 __call
+         * 支持加载一个不存在于action controller的默认路径模板
+         * 缺省动作是将 request参数传入模板中
+         * 这样就可以不写action只写模板
+         */	
+        public function __call($name, $args) {
+                $this->template->set_global($this->request->param());
+        }
+
  1. 是否觉得 $this->response->body($this->template) 太难看？ 试试下面的写法：
 
         $this->response->body(__Template__);

@@ -61,15 +61,12 @@ class JKit_Request extends Kohana_Request{
 	/**
 	 * 让流程跳转到指定action
 	 *
-	 * [!!] 跳转会设置 HTTP 状态码为 301 或 302  
-	 * 如果当前action始终跳转到一个地址，应当用 301，否则应当用 302
-	 *
 	 * @param string 要跳转到的uri
 	 * @param string 新增query参数，原有参数会保留
-	 * @param int    跳转状态码 301 或 302
+	 * @param int    跳转状态码 20x
 	 * @uses  Profiler::stop_all
 	 */
-	public function forward($uri, $params = array(), $code = 302){
+	public function forward($uri, $params = array(), $code = 200){
 		
 		$forward = Request::process_uri($uri);
 	
@@ -110,33 +107,6 @@ class JKit_Request extends Kohana_Request{
 
 		parent::redirect($url, $code);
 	}
-
-	/**
-	 * Creates a response based on the type of request, i.e. an
-	 * Request_HTTP will produce a Response_HTTP, and the same applies
-	 * to CLI.
-	 *
-	 * [!!] 重载 [Kohana_Response] ，自动将 `$this` 赋给创建的 [Response] 对象的 `_request` 属性
-	 *
-	 *      // Create a response to the request
-	 *      $response = $request->create_response();
-	 *
-	 * @param   boolean  $bind  Bind to this request
-	 * @return  Response
-	 * @since   3.1.0
-	 */
-	public function create_response($bind = TRUE)
-	{
-		$response = new Response(array('_protocol' => $this->protocol(), '_request' => $this));
-
-		if ($bind)
-		{
-			// Bind a new response to the request
-			$this->_response = $response;
-		}
-
-		return $response;
-	}	
 
 	/**
 	 * 将请求中可能出现跨站攻击的内容过滤

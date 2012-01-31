@@ -23,9 +23,9 @@ class JKit_Logic extends Model{
 	 *  若有 $forward 参数， 设置 forward 属性到返回值  
 	 *
 	 * @param  mixed  任意数据
-	 * @param  string 默认结果状态码
 	 * @param  string 错误信息
 	 * @param  string 跳转 url
+	 * @param  string 默认结果状态码
 	 * @return array  逻辑结果
 	 */
 	public static function parseResult($data, $msg = null, $forward=null, $default_status='sys.default'){

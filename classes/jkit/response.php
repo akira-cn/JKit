@@ -38,10 +38,10 @@ class JKit_Response extends Kohana_Response{
 		$json = json_encode($data);		
 
 		if($callback){
-			$this->headers(array('Content-type'=>'application/x-javascript', 'charset'=>'UTF-8'));
+			$this->headers(array('content-type'=>'application/x-javascript', 'charset'=>'UTF-8'));
 			return $this->body("{$callback}({$json});"); 
 		}else{
-			$this->headers(array('Content-type'=>'application/json', 'charset'=>'UTF-8'));
+			$this->headers(array('content-type'=>'application/json', 'charset'=>'UTF-8'));
 			return $this->body($json);
 		}
 	}
@@ -50,62 +50,39 @@ class JKit_Response extends Kohana_Response{
 	 * HTTP 返回 $data 数据的 jsonp 格式  
 	 * 通过在 url 中的 cb 参数传入回调函数名，如果缺省，则只返回 json 数据  
 	 *
-	 * [!!] 如果这个`response`有关联具体的`request`(参考 [Request::create_response])，那么'cb'参数读取 `$this->_request->param`  
-	 * 直接用 $_GET 可能不安全，因为也许会导致 XSS
-	 *
 	 *     $this->jsonp(array('foo' => 'bar')); // {'foo' : 'bar'}
 	 *
 	 * @param  array	要应答的数据
 	 * @return Response
 	 */
 	public function jsonp($data){
-		if($this->_request){
-			$cb = $this->_request->param('cb');
-		}
-		else{
-			$cb = $_REQUEST['cb'];
-		}
+		$cb = $_REQUEST['cb'];
 		return $this->json($data, $cb);
 	}
 
 	/**
 	 * 让 Response 输出debug信息
 	 *
-	 *     $this->response->debug('debug content', array('foo' => 'bar'), array('another' => 'value') ...);
+	 *     $this->response->debug(array('foo' => 'bar'), array('another' => 'value') ...);
 	 *
-	 * [!!]	从第二个参数开始可以传入任意多个对象，将依次传入这些对象的信息
+	 * [!!]	可以传入任意多个对象，将依次传入这些对象的信息
 	 *
 	 * @return Response
 	 */
-	public function debug($template = null){
-		if(isset($template)){
-			$this->_body = $template;
-		}
-		if($this->_body instanceof JKit_View){ //view
-			$this->_body->debugging = true;
-		}
-		else{ //string.. ect..
+	public function debug(){
+		$this->headers(array('jkit-debugger'=>'1.0'));
+
+		if(!($this->_body instanceof JKit_View)){ //view是template或字符串
 			$content = (string)$this->_body;
 			$this->_body = View::factory("string:{$content}");
-
-			$this->_body->debugging = true;
 		}
-		
+		$this->_body->debugging = true;
+
 		$args = func_get_args();
 		
 		//可以传额外参数进去
-		foreach($args as $key => $arg){
-			if($key){
-				$this->_body->set($arg);
-			}
-		}
-		
-		//如果有_request将_request的param()传进去
-		if($this->_request && $this->_request->param()){
-			$this->_body->set_global('_request_params', $this->_request->param());
-		}
-		else{
-			$this->_body->set_global('_request_params', $_POST + $_GET);
+		foreach($args as $arg){
+			$this->_body->set($arg);
 		}
 
 		return $this;
@@ -132,7 +109,7 @@ class JKit_Response extends Kohana_Response{
 		
 		return $this;
 	}
-	
+
 	/**
 	 * Outputs the body when cast to string
 	 *
