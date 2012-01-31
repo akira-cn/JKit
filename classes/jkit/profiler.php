@@ -38,8 +38,9 @@ class JKit_Profiler extends Kohana_Profiler{
 	 */
 	public static function stop_by_group($group){
 		$groups = Profiler::groups(false);
+		$key = strtolower($group);
 		
-		if($groups[strtolower($group)]){
+		if(array_key_exists($key, $groups) && $groups[$key]){
 			foreach($groups[strtolower($group)] as $name=>$tokens){
 				foreach($tokens as $token){
 					Profiler::stop($token);
@@ -94,20 +95,23 @@ class JKit_Profiler extends Kohana_Profiler{
 	{
 		if($name){
 			$groups = Profiler::groups(false);
+			$key = strtolower($token);
 
-			if($group = $groups[strtolower($token)]){
-				$tokens = $group[$name];
-				return self::stop($tokens[count($tokens) - 1]);
+			if(array_key_exists($key, $groups) && $group = $groups[$key]){
+				if(array_key_exists($name, $group)){
+					$tokens = $group[$name];
+					return self::stop($tokens[count($tokens) - 1]);
+				}
 			}
 		}
 		// Stop the benchmark
-		if(Profiler::$_marks[$token]['stop_time'] === FALSE){
+		if(array_key_exists($token, Profiler::$_marks) && Profiler::$_marks[$token]['stop_time'] === FALSE){
 			Profiler::$_marks[$token]['stop_time']   = microtime(TRUE);
 			Profiler::$_marks[$token]['stop_memory'] = memory_get_usage();
 			
 			list($time, $memory) = Profiler::total($token);
 
-			Log::instance()->debug('Profiler:', Profiler::$_marks[$token] + array('time'=>$time, 'memory'=>$memory));
+			//Log::instance()->debug('Profiler:', Profiler::$_marks[$token] + array('time'=>$time, 'memory'=>$memory));
 		}
 	}
 }

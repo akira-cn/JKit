@@ -31,6 +31,7 @@ require_once($GLOBALS['THRIFT_ROOT'] . '/transport/TSocket.php');
  */
 class JKit_Rpc_Thrift extends JKit_Rpc_Abstract {
 	protected $_objTrans = null;
+	protected static $_arrTrans = array();
 
 	/**
 	 * 执行RPC调用
@@ -77,7 +78,6 @@ class JKit_Rpc_Thrift extends JKit_Rpc_Abstract {
 				JKit::$log->warn($strErrMsg, $arrInput);
 				$arrOutput = false;
 			}
-			$this->_objTrans->close();
 			if ($arrOutput !== false) {
 				break;
 			}
@@ -88,6 +88,12 @@ class JKit_Rpc_Thrift extends JKit_Rpc_Abstract {
 	
 	//implements RPC_Abscract::realConnect
 	public function realConnect($arrServer) {
+        if (isset(self::$_arrTrans[$this->_strServerName])) {
+            $arrCache = self::$_arrTrans[$this->_strServerName];
+            $this->_objTrans = $arrCache['obj'];
+            $this->_arrNowServer = $arrCache['server'];
+            return true;          
+        }	    
 		if (! isset($arrServer['host']) || ! isset($arrServer['port'])) {
 			return false;
 		}
@@ -123,6 +129,7 @@ class JKit_Rpc_Thrift extends JKit_Rpc_Abstract {
 			if ($this->_arrOption['wtimeout']) {
 				$objSocket->setSendTimeout($this->_arrOption['wtimeout']);
 			}
+			self::$_arrTrans[$this->_strServerName] = array('obj' => $objTrans, 'server' => $arrServer);
 			$this->_objTrans = $objTrans;
 			$this->_arrNowServer = $arrServer;
 			return true;

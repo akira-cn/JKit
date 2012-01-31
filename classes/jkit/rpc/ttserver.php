@@ -27,6 +27,8 @@ class JKit_Rpc_Ttserver extends JKit_Rpc_Abstract {
 	 * @var mixed
 	 */
 	protected $_objMemcache = null;
+	//缓存每个服务的连接，这样一次请求中，同一个服务的服务器只会产生一次连接
+	protected static $_arrMemcache = array();
 
 	/**
 	 * 执行RPC调用
@@ -84,6 +86,12 @@ class JKit_Rpc_Ttserver extends JKit_Rpc_Abstract {
 	
 	//implements RPC_Abscract::realConnect
 	public function realConnect($arrServer) {
+	    if (isset(self::$_arrMemcache[$this->_strServerName])) {
+	        $arrCache = self::$_arrMemcache[$this->_strServerName];
+	        $this->_objMemcache = $arrCache['obj'];
+	        $this->_arrNowServer = $arrCache['server'];
+	        return true;
+	    }
 		if (! isset($arrServer['host']) || ! isset($arrServer['port'])) {
 			return false;
 		}
@@ -95,6 +103,7 @@ class JKit_Rpc_Ttserver extends JKit_Rpc_Abstract {
 		} else {
 			$this->_objMemcache = $objMemcache;
 			$this->_arrNowServer = $arrServer;
+			self::$_arrMemcache[$this->_strServerName] = array('obj' => $objMemcache, 'server' => $arrServer);
 			return true;
 		}	
 	}

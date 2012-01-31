@@ -23,6 +23,11 @@ class JKit_View extends Kohana_View{
 	 * @var array
 	 */
 	protected static $_global_data = array();
+
+	/**
+	 * 用来暂时存放给模板的变量，主要是给同时存在php和smarty两种混合模板的时候将php中的变量传给smarty
+	 */
+	protected static $_temp_local_data;
 	
 	/**
 	 * 模板文件信息，根据不同情况会触发不同类型的模板对象的实例化，具体详见 [View::set_filename]
@@ -47,13 +52,6 @@ class JKit_View extends Kohana_View{
 	 * @var Template|Layout
 	 */
 	protected $_template;
-
-	/**
-	 * 当模板渲染一次之后，这个变量的值为 true
-	 *
-	 * @var boolean
-	 */
-	protected $_rendered = false;
 
 	/**
 	 * 调试状态，如果调试的话，render后会附带调试信息
@@ -97,11 +95,11 @@ class JKit_View extends Kohana_View{
 				 * views/<file_path>/file -- view_file / main_layout(page)
 				 *					/file/*  -- sub_layouts	
 				 * in main_layout ——
-				  <%extends file=$layout.file%>
-				  <%block name='a'%>
-						...
-				  <%/block%>
-				  ...
+				 * <%extends file=$layout.file%>
+				 * <%block name='a'%>
+				 *		...
+				 * <%/block%>
+				 * ...
 				 */
 				$template->assignLayout($kohana_view_data);
 				
@@ -112,15 +110,14 @@ class JKit_View extends Kohana_View{
 				return $template->render($file);
 			}
 			else{
-				//局部变量
-				$template->assign($kohana_view_data);
-				
 				//全局变量
 				foreach(View::$_global_data as $key=>$value){
 					$template->assignGlobal($key, $value);
 				}
-				
 				if(!JKit::$template_settings['enable_php']){ //直接作为Smarty解析
+					//局部变量
+					$template->assign($kohana_view_data);
+
 					return $template->fetch($file);	
 				}
 				else{
@@ -128,7 +125,10 @@ class JKit_View extends Kohana_View{
 						return $template->fetch($file);	
 					}
 					//先把php的内容解析了
-					$kohana_view_source = Kohana_View::capture($file, $kohana_view_data);
+					//$kohana_view_source = Kohana_View::capture($file, $kohana_view_data);
+					$kohana_view_source = self::capturePHP($file, $kohana_view_data);
+					$template->assign(self::$_temp_local_data);
+					self::$_temp_local_data = NULL;
 
 					try{
 						return $template->fetch('string:'.$kohana_view_source);		
@@ -139,7 +139,49 @@ class JKit_View extends Kohana_View{
 			}
 		}
 	}
-	
+	// copy from Kohana_View::capture & set varibles to smarty template
+	protected static function capturePHP($kohana_view_filename, array $kohana_view_data){
+		// Import the view variables to local namespace
+		extract($kohana_view_data, EXTR_SKIP);
+
+		if (View::$_global_data)
+		{
+			// Import the global view variables to local namespace
+			extract(View::$_global_data, EXTR_SKIP);
+		}
+
+		// Capture the view output
+		ob_start();
+
+		try
+		{
+			// Load the view within the current scope
+			include $kohana_view_filename;
+
+			// 删掉全局变量，以免重复加载
+			foreach(View::$_global_data as $key=>$value){
+				unset($$key);
+			}
+
+			// add additional variables to smarty
+			unset($kohana_view_filename);
+			unset($kohana_view_data);
+			
+			self::$_temp_local_data = get_defined_vars();
+		}
+		catch (Exception $e)
+		{
+			// Delete the output buffer
+			ob_end_clean();
+
+			// Re-throw the exception
+			throw $e;
+		}
+
+		// Get the captured output and close the buffer
+		return ob_get_clean();	
+	}
+
 	/**
 	 * 获得或创建当前模板对象，如果还未创建，先创建  
 	 * 创建模板对象的类型根据 $this->_file['type']  
@@ -178,7 +220,8 @@ class JKit_View extends Kohana_View{
 	 */
 	public function set_filename($file)
 	{
-		if($this->_file && $file == $this->_file['path']){
+		if($this->_file && array_key_exists('path', $this->_file) 
+		    && $file == $this->_file['path']){
 			return $this;
 		}
 
@@ -226,22 +269,6 @@ class JKit_View extends Kohana_View{
 	 * @uses	 Template::fetch_debug
 	 */
 	public function render($file = NULL){
-		if(!$this->_rendered){
-			$this->_rendered = true;
-		}
 		return parent::render($file).($this->debugging?Template::fetch_debug($this->get_template_object()):'');
-	}
-	
-	/**
-	 * 模板是否已被渲染过，已被渲染过则返回 true
-     * 
-	 * [!!] 一般情况下一个View只被render一次  
-	 * 在 `Controller` 中不论显式设置或隐式触发了 `$auto_render=true` 而在 action 中已经调用了 `render` 那么 `$auto_render` 会失效  
-	 * 不过并不强制用户只能调用一次render，因为Kohana中默认也未作限制
-	 *
-	 * @return boolean
-	 */
-	public function rendered(){
-		return $this->_rendered;
 	}
 } // End View

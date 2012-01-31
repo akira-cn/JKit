@@ -108,7 +108,6 @@
 
         $this->response->body(__Template__);
 
-
 ## 有用的约定 {#useful-rules}
 
  1. Model 中，业务逻辑相关的类放在 `classes/model/logic` 文件夹下，继承 Logic， 数据实体相关的类放在 `classes/model/data` 文件夹下，继承 Data

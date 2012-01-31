@@ -28,18 +28,3 @@ JKit::$security['xss']  = true;
  * Attach a file reader to config. Multiple readers are supported.
  */
 JKit::$config->attach(new Config_File);
-
-/**
- * Attach a file reader to config at dev.
- * 开发环境下，优先采用config/dev的配置
- */
-if(JKit::$environment == JKit::DEVELOPMENT){
-	JKit::$config->attach(new Config_File('config/dev'));
-}
-
-//Attach the file write to logging. Multiple writers are supported.
-JKit::$log->attach(new Log_File(DOCROOT.'logs', 'JKit_Log',
-		JKit::$environment == JKit::DEVELOPMENT ? Log_File::SPLIT_DAY : Log_File::SPLIT_HOUR
-	)
-	,JKit::$environment == JKit::DEVELOPMENT ? LOG::DEBUG : LOG::ERROR
-);

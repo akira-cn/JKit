@@ -50,21 +50,13 @@ class JKit_Response extends Kohana_Response{
 	 * HTTP 返回 $data 数据的 jsonp 格式  
 	 * 通过在 url 中的 cb 参数传入回调函数名，如果缺省，则只返回 json 数据  
 	 *
-	 * [!!] 如果这个`response`有关联具体的`request`(参考 [Request::create_response])，那么'cb'参数读取 `$this->_request->param`  
-	 * 直接用 $_GET 可能不安全，因为也许会导致 XSS
-	 *
 	 *     $this->jsonp(array('foo' => 'bar')); // {'foo' : 'bar'}
 	 *
 	 * @param  array	要应答的数据
 	 * @return Response
 	 */
 	public function jsonp($data){
-		if($this->_request){
-			$cb = $this->_request->param('cb');
-		}
-		else{
-			$cb = $_REQUEST['cb'];
-		}
+		$cb = $_REQUEST['cb'];
 		return $this->json($data, $cb);
 	}
 
@@ -78,9 +70,9 @@ class JKit_Response extends Kohana_Response{
 	 * @return Response
 	 */
 	public function debug(){
-		$this->headers(array('content-type'=>'text/html', 'charset'=>'UTF-8', 'jkit-debugger'=>'1.0'));
+		$this->headers(array('jkit-debugger'=>'1.0'));
 
-		if(!($this->_body instanceof JKit_View)){ //view
+		if(!($this->_body instanceof JKit_View)){ //view是template或字符串
 			$content = (string)$this->_body;
 			$this->_body = View::factory("string:{$content}");
 		}
@@ -117,7 +109,7 @@ class JKit_Response extends Kohana_Response{
 		
 		return $this;
 	}
-	
+
 	/**
 	 * Outputs the body when cast to string
 	 *

@@ -1,4 +1,9 @@
 <?php
+
+define('RPC_TYPE_HTTP', 1);
+define('RPC_TYPE_THRIFT', 2);
+define('RPC_TYPE_TTSERVER', 3);
+
 /**
  * 使用方法示例（需要先在config/rpc.php中配置好相应的服务）
  * 
