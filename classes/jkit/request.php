@@ -16,7 +16,7 @@
  */
 class JKit_Request extends Kohana_Request{
 	/**
-     *  当前的kohana版本中这个函数有个bug  
+     	 *  当前的kohana版本中这个函数有个bug  
 	 *	传Array进去的时候忘记return $this  
 	 *
 	 * [!!] 修复bug
