@@ -121,9 +121,6 @@ class JKit_View extends Kohana_View{
 					return $template->fetch($file);	
 				}
 				else{
-					if(strpos($file, 'string:') === 0){ //字符串模板
-						return $template->fetch($file);	
-					}
 					//先把php的内容解析了
 					//$kohana_view_source = Kohana_View::capture($file, $kohana_view_data);
 					$kohana_view_source = self::capturePHP($file, $kohana_view_data);
@@ -131,6 +128,9 @@ class JKit_View extends Kohana_View{
 					self::$_temp_local_data = NULL;
 
 					try{
+						if(strpos($file, 'string:') === 0){ //字符串模板
+							return $template->fetch($file);	
+						}
 						return $template->fetch('string:'.$kohana_view_source);		
 					}catch(Exception $ex){
 						return $kohana_view_source;

@@ -56,7 +56,7 @@ class JKit_Response extends Kohana_Response{
 	 * @return Response
 	 */
 	public function jsonp($data){
-		$cb = $_REQUEST['cb'];
+		$cb = Controller::current_controller()->request->param('cb');
 		return $this->json($data, $cb);
 	}
 
@@ -131,6 +131,7 @@ class JKit_Response extends Kohana_Response{
 	 * @uses Profiler::stop_by_group
 	 */
 	public function send(){
+		Controller::current_controller()->after();
 		Profiler::stop_by_group('Requests'); //结束Request的Profiler
 		echo $this->send_headers()->body();
 		exit;

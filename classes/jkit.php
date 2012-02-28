@@ -40,8 +40,10 @@ class JKit extends Kohana{
 	public static $security = array(
 		'xss'  =>  false,
 		'csrf' =>  false,
+		'non-ajax access' => true,	//json的非ajax访问
 	);
 	
+
 	/**
 	 * 读取配置的内容
 	 *

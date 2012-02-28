@@ -23,6 +23,7 @@ JKit::$template_settings = array(
 //安全设置
 JKit::$security['csrf'] = true;
 JKit::$security['xss']  = true;
+JKit::$security['non-ajax access'] = true;
 
 /**
  * Attach a file reader to config. Multiple readers are supported.

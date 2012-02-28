@@ -25,7 +25,18 @@ abstract class JKit_Controller extends Kohana_Controller{
 	 */
 	protected static $_template;
 
-	protected $jsonp = false;
+	protected static $_controller;
+
+	/**
+	 * 增加 debug 跟踪的对象
+	 * $this->trace($key, $value)
+	 * 将要设置的变量存入以便在debug中显示出来
+	 *
+	 * @var mixed
+	 */
+	protected $_trace = array();
+
+	protected $auto_jsonp = false;
 
 	/**
 	 * 获得当前框架的默认模板
@@ -38,6 +49,10 @@ abstract class JKit_Controller extends Kohana_Controller{
 		return self::$_template;
 	}
 
+	public static function current_controller(){
+		return self::$_controller;
+	}
+
 	/**
 	 * 在 Controller 的 action 被调用前自动运行： 重载了 [Kohana_Controller::before]  
 	 * 如果设置了 `JKit::$environment=JKit::DEVELOPMENT` 并且在 url 中传递了 rdtest 参数，那么设置 [View::$debugging] 为 true，打开调试信息
@@ -48,6 +63,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 		parent::before();
 
 		self::$_template = View::factory(str_replace('_', '/', $this->request->controller()) . '/' . $this->request->action());
+		self::$_controller = $this;
 
 		if (JKit::$security['csrf'] && count($this->request->post()))
 		{ //防止跨站请求伪造
@@ -84,10 +100,18 @@ abstract class JKit_Controller extends Kohana_Controller{
 
 		//追加调试信息
 		if(JKit::$environment == JKit::DEVELOPMENT && $this->request->param('rdtest')){
-			$this->response->debug(array('_requested_params' => $this->request->param()));
+			$this->trace('_requested_params', $this->request->param());
+			$this->response->debug($this->_trace);
 		}
 		
 		parent::after();		
+	}
+
+	/**
+	 * 设置 _trace 变量到模板中便于调试跟踪
+	 */
+	protected function trace($key, $value){
+		$this->_trace[$key] = $value;
 	}
 
 	/**
@@ -159,7 +183,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 		$result = Logic::parseResult($data, $msg, $forward, $catch_errs[0]); 
 
 		//如果配置为默认支持jsonp
-		if(!$callback && $this->jsonp){
+		if(!$callback && $this->auto_jsonp){
 			$callback = $this->request->param('cb'); //这个支持Route的callback
 		}
 
@@ -167,7 +191,7 @@ abstract class JKit_Controller extends Kohana_Controller{
 		if( !$catch_errs[0] && $result['err'] != 'ok'  //如果不捕获特定状态，那么捕获除了ok之外的所有状态
 			|| in_array($result['err'], $catch_errs)){ 
 			//如果是ajax请求
-			if($callback || $this->request->is_ajax()){	//如果有callback说明是jsonp，那么不一定用ajax
+			if($callback || JKit::$security['non-ajax access'] || $this->request->is_ajax()){	//如果有callback说明是jsonp，那么不一定用ajax
 				//直接返回json结果
 				$this->response->json($result, $callback)->send();
 			}

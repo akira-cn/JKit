@@ -37,17 +37,17 @@ class JKit_Rpc_Http extends JKit_Rpc_Abstract {
     
     /**
      * 进行HTTP交互
-	 *
-	 *     $param = $arrInput {
+     *
+     *     $param = $arrInput {
      * 		    action : $url,
      * 		    method : 'POST',
      * 		    post_vars : array(...),
      * 		    curl_opts : array(...),
      * 		    cookie : array(...),
      *     }
-	 *     $strContent = $objRPC->call($param, 2);
-	 *     $this->response->('content-type','text/html;charset=gbk')->send_headers()->body($strContent);
-	 *
+     *     $strContent = $objRPC->call($param, 2);
+     *     $this->response->('content-type','text/html;charset=gbk')->send_headers()->body($strContent);
+     *
      * @param array  调用参数
 	 * @param int    重试次数
      * @return mixed 成功返回HTTP请求的响应字符串，失败返回false
@@ -64,13 +64,23 @@ class JKit_Rpc_Http extends JKit_Rpc_Abstract {
             }
             curl_setopt($this->_resConn, CURLOPT_COOKIE, $strCookie);
         }
+        $strUrl = empty($arrInput['action']) ? '/' : $arrInput['action'];
         if (isset($arrInput['method']) && (strtolower($arrInput['method']) == 'post') ) {
             curl_setopt($this->_resConn, CURLOPT_POST, 1);
             if(isset($arrInput['post_vars'])) {
                 curl_setopt($this->_resConn, CURLOPT_POSTFIELDS, $arrInput['post_vars']);
             }
+        } else {
+            if(isset($arrInput['post_vars'])) {
+                $strParam = http_build_query($arrInput['post_vars']);
+                if (strpos($strUrl, '?') === false) {
+                    $strUrl .= "?{$strParam}";
+                } else {
+                    $strUrl .= "&{$strParam}";
+                }
+            }            
         }
-        $strUrl = isset($arrInput['action']) ? $arrInput['action'] : '/index.html';
+        
         $arrOutput = false;
         while ($intRetry--) {
         	$this->connect();

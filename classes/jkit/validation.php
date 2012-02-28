@@ -221,21 +221,22 @@ class ValidAdaptor{
 				
 				//先解析 $datatype
 				if($section = $rule['datatype']){ //如果有datatype
-					list($section_name, $pattern) = explode('-', $section);
+				    $arrTmp = explode('-', $section);
+				    $section_name = $arrTmp[0];
 					
 					//解析跟在datatype后面的pattern，现在有三种格式 -m.n -/reg/ -a||b
-					if($pattern){	
-						$rule[$section_name.'-pattern'] = $pattern;
+					if (isset($arrTmp[1])) {	
+						$rule[$section_name.'-pattern'] = $arrTmp[1];
 					}
 
 					//解析datatype
-					if($trans_rules = $this->datetype($section_name, $rule, $field_name))	
+					if($trans_rules = @$this->datetype($section_name, $rule, $field_name))	
 					{
 						$sections  = array_merge($sections, $trans_rules); 
 					}
 					
 					//解析reqmsg
-					if($rule['reqmsg']){
+					if(isset($rule['reqmsg'])){
 						array_push($sections, array('not_empty'));
 						unset($rule['reqmsg']);
 					}	
