@@ -37,17 +37,16 @@ class JKit_Rpc_Http extends JKit_Rpc_Abstract {
     
     /**
      * 进行HTTP交互
-     *
-     *     $param = $arrInput {
+	 *
+	 *     $param = $arrInput {
      * 		    action : $url,
      * 		    method : 'POST',
      * 		    post_vars : array(...),
      * 		    curl_opts : array(...),
      * 		    cookie : array(...),
      *     }
-     *     $strContent = $objRPC->call($param, 2);
-     *     $this->response->('content-type','text/html;charset=gbk')->send_headers()->body($strContent);
-     *
+	 *     $strContent = $objRPC->call($param, 2);
+	 *
      * @param array  调用参数
 	 * @param int    重试次数
      * @return mixed 成功返回HTTP请求的响应字符串，失败返回false

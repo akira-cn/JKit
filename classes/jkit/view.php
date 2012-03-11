@@ -160,6 +160,13 @@ class JKit_View extends Kohana_View{
 
 			// 删掉全局变量，以免重复加载
 			foreach(View::$_global_data as $key=>$value){
+				View::$_global_data[$key] = $value;	//如果php中修改了，覆盖
+				unset($$key);
+			}
+
+			//用完后删掉局部变量，也避免污染smarty的变量空间
+			foreach(View::$kohana_view_data as $key=>$value){
+				View::$kohana_view_data[$key] = $value; //如果php中修改了，覆盖
 				unset($$key);
 			}
 

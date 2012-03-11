@@ -107,7 +107,15 @@ class JKit_Log_File extends Kohana_Log_File {
 		$strNormalLog = null;
 		$i = 0;
 		foreach ($messages as $message) {
-			$strParam = is_array($message['param']) ? http_build_query($message['param']) : null;
+		    if (is_array($message['param'])) {
+		        $strParam = http_build_query($message['param']);
+		    } elseif (is_object($message['param'])) {
+		        $strParam = http_build_query(get_object_vars($message['param']));
+		    } elseif (! empty($message['param'])) {
+		        $strParam = http_build_query(array('myparam' => (string) $message['param']));
+		    } else {
+		        $strParam = null;
+		    }
 			$strLogType = isset($arrLevelName[$message['level']]) ? $arrLevelName[$message['level']] : 'NOTICE';
 			$arrTmp = array($strLogType, $message['logid'], $message['time'], $message['pos'],
 				$message['body'],
