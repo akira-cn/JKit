@@ -166,14 +166,15 @@ class JKit_View extends Kohana_View{
 
 			// add additional variables to smarty
 			unset($kohana_view_filename);
-			unset($kohana_view_data);
 			
 			self::$_temp_local_data = get_defined_vars();
+			unset(self::$_temp_local_data['kohana_view_data']);
 			
 			//用完后删掉局部变量，也避免污染smarty的变量空间
 			foreach($kohana_view_data as $key=>$value){
 				unset($$key);
 			}
+			unset($kohana_view_data);
 		}
 		catch (Exception $e)
 		{
