@@ -201,8 +201,8 @@ abstract class JKit_Controller extends Kohana_Controller{
 			}
 		}
 
-		//否则返回result，期待下一个匹配
-		return $result;
+		//否则返回false，期待下一个匹配
+		return false;
 	}
 	
 	/**
